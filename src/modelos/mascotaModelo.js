@@ -26,8 +26,12 @@ const mascotas = db.define('mascotas', {
         type: Sequelize.INTEGER,
         allowNull: true
     },
+    foto: {
+        type: Sequelize.STRING,
+        allowNull: true
+    },
     estado_adopcion: {
-        type: Sequelize.ENUM('disponible', 'adoptado', 'en proceso'),
+        type: Sequelize.ENUM('Disponible', 'Adoptado', 'En proceso'),
         allowNull: false
     },
     descripcion: {

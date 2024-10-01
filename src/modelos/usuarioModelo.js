@@ -22,7 +22,7 @@ export const usuarios = db.define('usuarios', {
         type: Sequelize.STRING,
         allowNull: false
     },
-    contraseña: {
+    password: {
         type: Sequelize.STRING,
         allowNull: false
     },

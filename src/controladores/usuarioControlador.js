@@ -56,9 +56,9 @@ const buscarUsuarioNombre = (req, res) => {
 
 // Crear un usuario en la tabla
 const crearUsuario = (req, res) => {
-    const { nombres, usuario, contraseña, rol } = req.body;
+    const { nombres, usuario, password, rol } = req.body;
 
-    if (!nombres || !usuario || !contraseña || !rol) {
+    if (!nombres || !usuario || !password || !rol) {
         res.status(400).json({ tipo: 'error', mensaje: "Los campos nombres, usuario, contraseña y rol son requeridos" });
         return;
     }
@@ -67,7 +67,7 @@ const crearUsuario = (req, res) => {
         nombres,
         edad: req.body.edad,
         usuario,
-        contraseña,
+        password,
         foto: req.body.foto,
         rol,
         telefono: req.body.telefono,

@@ -42,13 +42,19 @@ const crearMascota = (req, res) => {
         return;
     }
 
+    // Validación de la ruta de la foto
+    if (foto && !foto.startsWith('/img/')) {
+        res.status(400).json({ tipo: 'error', mensaje: "La ruta de la foto debe comenzar con '/img/'" });
+        return;
+    }
+
     const dataset = {
         nombre,
         especie,
         raza,
         edad: req.body.edad,
         estado_adopcion,
-        foto,
+        foto: foto || '/img/default.jpg', // Valor predeterminado si no hay foto
         descripcion,
     };
 
@@ -76,11 +82,11 @@ const eliminarMascota = async (req, res) => {
 
         // Luego eliminar la mascota
         const resultado = await mascotas.destroy({ where: { id } });
-        
+
         if (resultado === 0) {
             return res.status(404).json({ tipo: 'error', mensaje: "Mascota no encontrada" });
         }
-        
+
         res.status(200).json({ tipo: 'success', mensaje: "Mascota eliminada exitosamente" });
     } catch (e) {
         res.status(500).json({ tipo: 'error', mensaje: "No se ha podido eliminar el registro: " + e });
@@ -97,6 +103,13 @@ const actualizarMascota = (req, res) => {
     }
 
     const updates = req.body;
+
+    // Validación de la foto
+    if (updates.foto && !updates.foto.startsWith('/img/')) {
+        res.status(400).json({ tipo: 'error', mensaje: "La ruta de la foto debe comenzar con '/img/'" });
+        return;
+    }
+
     if (Object.keys(updates).length === 0) {
         res.status(400).json({ tipo: 'error', mensaje: "No se ha encontrado ningún dato para actualizar" });
         return;
