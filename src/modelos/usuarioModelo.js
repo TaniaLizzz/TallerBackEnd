@@ -30,10 +30,6 @@ export const usuarios = db.define('usuarios', {
         type: Sequelize.STRING,
         allowNull: false
     },
-    foto: {
-        type: Sequelize.STRING,
-        allowNull: true
-    },
     edad: {
         type: Sequelize.INTEGER,
         allowNull: true

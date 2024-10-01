@@ -68,7 +68,6 @@ const crearUsuario = (req, res) => {
         edad: req.body.edad,
         usuario,
         password,
-        foto: req.body.foto,
         rol,
         telefono: req.body.telefono,
     };
