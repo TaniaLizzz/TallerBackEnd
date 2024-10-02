@@ -42,19 +42,13 @@ const crearMascota = (req, res) => {
         return;
     }
 
-    // Validación de la ruta de la foto
-    if (foto && !foto.startsWith('/img/')) {
-        res.status(400).json({ tipo: 'error', mensaje: "La ruta de la foto debe comenzar con '/img/'" });
-        return;
-    }
-
     const dataset = {
         nombre,
         especie,
         raza,
         edad: req.body.edad,
         estado_adopcion,
-        foto: foto || '/img/default.jpg', // Valor predeterminado si no hay foto
+        foto: foto || null, // Acepta cualquier URL o deja null si no se proporciona una
         descripcion,
     };
 
@@ -103,12 +97,6 @@ const actualizarMascota = (req, res) => {
     }
 
     const updates = req.body;
-
-    // Validación de la foto
-    if (updates.foto && !updates.foto.startsWith('/img/')) {
-        res.status(400).json({ tipo: 'error', mensaje: "La ruta de la foto debe comenzar con '/img/'" });
-        return;
-    }
 
     if (Object.keys(updates).length === 0) {
         res.status(400).json({ tipo: 'error', mensaje: "No se ha encontrado ningún dato para actualizar" });

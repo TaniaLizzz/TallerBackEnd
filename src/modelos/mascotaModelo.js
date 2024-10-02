@@ -15,7 +15,7 @@ const mascotas = db.define('mascotas', {
         allowNull: false
     },
     especie: {
-        type: Sequelize.STRING,
+        type: Sequelize.ENUM('Perro', 'Gato'),
         allowNull: false
     },
     raza: {
