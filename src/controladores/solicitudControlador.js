@@ -126,38 +126,38 @@ const crearSolicitud = async (req, res) => {
 // Actualizar solicitud por id
 const actualizarSolicitud = async (req, res) => {
     const id = parseInt(req.params.id);
-    const { estado } = req.body;
+    const { estado_adopcion, mascotaId, adoptanteId } = req.body; // Asegúrate de incluir todos los campos necesarios
 
     if (isNaN(id)) {
         return res.status(400).json({ tipo: 'error', mensaje: "El id no puede estar vacío" });
     }
 
-    if (!estado) {
+    if (!estado_adopcion) {
         return res.status(400).json({ tipo: 'error', mensaje: "El campo estado es requerido" });
     }
 
     try {
-        // Buscar la solicitud
         const solicitud = await solicitudes.findByPk(id);
         if (!solicitud) {
             return res.status(404).json({ tipo: 'error', mensaje: "Solicitud no encontrada" });
         }
 
-        // Actualizar la solicitud
-        solicitud.estado_adopcion = estado;
+        // Actualizar los campos de la solicitud
+        solicitud.estado_adopcion = estado_adopcion;
+        solicitud.mascotaId = mascotaId; // Actualiza la mascota si es necesario
+        solicitud.adoptanteId = adoptanteId; // Actualiza el adoptante si es necesario
 
         // Actualizar fechaFin según el estado
-        if (estado === 'Adoptado') {
+        if (estado_adopcion === 'Adoptado') {
             solicitud.fechaFin = new Date(); // Fecha actual
-        } else if (estado === 'En proceso') {
+        } else if (estado_adopcion === 'En proceso') {
             solicitud.fechaFin = "En proceso"; // Asignar "En proceso"
         }
 
-        // Guardar cambios en la solicitud
         await solicitud.save();
 
         // Cambiar el estado de la mascota a 'Adoptado' si es necesario
-        if (estado === 'Adoptado') {
+        if (estado_adopcion === 'Adoptado') {
             await mascotas.update(
                 { estado_adopcion: 'Adoptado' },
                 { where: { id: solicitud.mascotaId } }
@@ -169,6 +169,7 @@ const actualizarSolicitud = async (req, res) => {
         res.status(500).json({ tipo: 'error', mensaje: "No se ha podido actualizar la solicitud: " + e });
     }
 };
+
 
 export {
     crearSolicitud,
