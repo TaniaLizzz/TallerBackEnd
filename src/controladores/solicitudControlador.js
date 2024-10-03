@@ -1,9 +1,8 @@
-// Importamos el modelo de solicitudes
 import { solicitudes } from "../modelos/solicitudModelo.js";
-import { usuarios } from "../modelos/usuarioModelo.js"; // Asegúrate de que esta línea esté presente
-import { mascotas } from "../modelos/mascotaModelo.js"; // También asegúrate de que esto esté presente
+import { usuarios } from "../modelos/usuarioModelo.js";
+import { mascotas } from "../modelos/mascotaModelo.js";
 
-// Listar todas las solicitudes x       
+// Listar todas las solicitudes
 const listarSolicitudes = (req, res) => {
     solicitudes.findAll()
         .then((result) => {
@@ -88,8 +87,9 @@ const eliminarSolicitud = (req, res) => {
         });
 };
 
+// Crear solicitud
 const crearSolicitud = async (req, res) => {
-    const { mascotaId, adoptanteId, estado_adopcion, fechaFin } = req.body;
+    const { mascotaId, adoptanteId, estado_adopcion } = req.body;
 
     if (!mascotaId || !adoptanteId || !estado_adopcion) {
         return res.status(400).json({ mensaje: "Los campos mascotaId, adoptanteId y estado_adopcion son requeridos" });
@@ -113,7 +113,7 @@ const crearSolicitud = async (req, res) => {
             adoptanteId,
             estado_adopcion,
             fechaCreacion: new Date(),
-            fechaFin: fechaFin || null,
+            fechaFin: estado_adopcion === 'Adoptado' ? new Date() : 'En proceso', // Manejo de fechaFin
         };
 
         await solicitudes.create(dataset);
@@ -124,54 +124,58 @@ const crearSolicitud = async (req, res) => {
 };
 
 // Actualizar solicitud por id
-// Actualizar solicitud por id
 const actualizarSolicitud = async (req, res) => {
     const id = parseInt(req.params.id);
+    const { estado } = req.body;
 
     if (isNaN(id)) {
-        return res.status(400).json({ mensaje: "Se requiere el id para poder buscar el registro" });
+        return res.status(400).json({ tipo: 'error', mensaje: "El id no puede estar vacío" });
     }
 
-    const updates = req.body;
-
-    if (Object.keys(updates).length === 0) {
-        return res.status(400).json({ mensaje: "No se ha detectado ningún campo para actualizar" });
+    if (!estado) {
+        return res.status(400).json({ tipo: 'error', mensaje: "El campo estado es requerido" });
     }
 
     try {
         // Buscar la solicitud
         const solicitud = await solicitudes.findByPk(id);
-
         if (!solicitud) {
-            return res.status(404).json({ mensaje: "Solicitud no encontrada" });
-        }
-
-        // Si el estado de adopción cambia a 'adoptado' (o cualquier otro estado que definas para adopción exitosa)
-        if (updates.estado_adopcion && updates.estado_adopcion === 'adoptado') {
-            // Actualizar la fechaFin con la fecha actual (fecha de adopción)
-            updates.fechaFin = new Date();
-
-            // Actualizar el estado de adopción de la mascota
-            const mascota = await mascotas.findByPk(solicitud.mascotaId);
-            if (mascota) {
-                await mascota.update({ estado_adopcion: 'adoptado' });
-            } else {
-                return res.status(404).json({ mensaje: "La mascota asociada no existe" });
-            }
+            return res.status(404).json({ tipo: 'error', mensaje: "Solicitud no encontrada" });
         }
 
         // Actualizar la solicitud
-        const result = await solicitudes.update(updates, { where: { id } });
+        solicitud.estado_adopcion = estado;
 
-        if (result[0] === 0) {
-            return res.status(404).json({ mensaje: "Solicitud no encontrada" });
+        // Actualizar fechaFin según el estado
+        if (estado === 'Adoptado') {
+            solicitud.fechaFin = new Date(); // Fecha actual
+        } else if (estado === 'En proceso') {
+            solicitud.fechaFin = "En proceso"; // Asignar "En proceso"
         }
 
-        res.status(200).json({ mensaje: "Solicitud actualizada exitosamente" });
-    } catch (error) {
-        res.status(500).json({ mensaje: "No se pudo alterar el registro en la base de datos: " + error });
+        // Guardar cambios en la solicitud
+        await solicitud.save();
+
+        // Cambiar el estado de la mascota a 'Adoptado' si es necesario
+        if (estado === 'Adoptado') {
+            await mascotas.update(
+                { estado_adopcion: 'Adoptado' },
+                { where: { id: solicitud.mascotaId } }
+            );
+        }
+
+        res.status(200).json({ tipo: 'success', mensaje: "Solicitud actualizada exitosamente" });
+    } catch (e) {
+        res.status(500).json({ tipo: 'error', mensaje: "No se ha podido actualizar la solicitud: " + e });
     }
 };
 
-
-export { listarSolicitudes, crearSolicitud, buscarSolicitudMascota, buscarSolicitudUser, buscarSolicitud, eliminarSolicitud, actualizarSolicitud };
+export {
+    crearSolicitud,
+    listarSolicitudes,
+    buscarSolicitud,
+    buscarSolicitudUser,
+    buscarSolicitudMascota,
+    eliminarSolicitud,
+    actualizarSolicitud,
+};

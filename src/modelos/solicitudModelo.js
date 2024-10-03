@@ -22,7 +22,8 @@ const solicitudes = db.define('solicitudes', {
     },
     estado_adopcion: {
         type: Sequelize.ENUM('Disponible', 'Adoptado', 'En proceso'),
-        allowNull: false
+        allowNull: false,
+        defaultValue: 'Disponible' // Establece "Disponible" como valor predeterminado
     },
     fechaCreacion: {
         type: Sequelize.DATE,
